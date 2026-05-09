@@ -1,9 +1,5 @@
-# 🏦 Banking Transactions API
-
-> **Date Submitted**: May 7, 2026
-> **AI Tools Used**: GitHub Copilot
-
----
+## 🏦 Homework 1: Banking Transactions API
+**Student Name:** Volodymyr Zubchynskyi **Date Submitted:** May 9, 2026 **AI Tools Used:** GitHub Copilot
 
 ## 📋 Project Overview
 
