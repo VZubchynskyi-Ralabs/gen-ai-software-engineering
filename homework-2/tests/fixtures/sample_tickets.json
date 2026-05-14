@@ -1,0 +1,404 @@
+{
+  "tickets": [
+    {
+      "customer_id": "CUST-1000",
+      "customer_email": "user1@example.com",
+      "customer_name": "Customer 1",
+      "subject": "Cannot login to my account",
+      "description": "I cannot login to my account since yesterday. The error message says invalid credentials but I am sure my password is correct.",
+      "category": "account_access",
+      "priority": "urgent",
+      "status": "new",
+      "tags": [
+        "tag0",
+        "tag1"
+      ],
+      "assigned_to": "",
+      "metadata": {
+        "source": "web_form",
+        "browser": "Chrome",
+        "device_type": "desktop"
+      }
+    },
+    {
+      "customer_id": "CUST-1001",
+      "customer_email": "user2@example.com",
+      "customer_name": "Customer 2",
+      "subject": "Password reset not working",
+      "description": "The password reset email never arrives even after multiple attempts. This is blocking me from accessing my account.",
+      "category": "technical_issue",
+      "priority": "high",
+      "status": "in_progress",
+      "tags": [
+        "tag1",
+        "tag2"
+      ],
+      "assigned_to": "agent2@support.com",
+      "metadata": {
+        "source": "email",
+        "browser": "Chrome",
+        "device_type": "mobile"
+      }
+    },
+    {
+      "customer_id": "CUST-1002",
+      "customer_email": "user3@example.com",
+      "customer_name": "Customer 3",
+      "subject": "Invoice amount is incorrect",
+      "description": "My latest invoice shows a charge of $200 but I should only be charged $150 according to my plan.",
+      "category": "billing_question",
+      "priority": "medium",
+      "status": "waiting_customer",
+      "tags": [
+        "tag2",
+        "tag3"
+      ],
+      "assigned_to": "agent3@support.com",
+      "metadata": {
+        "source": "api",
+        "browser": "Chrome",
+        "device_type": "tablet"
+      }
+    },
+    {
+      "customer_id": "CUST-1003",
+      "customer_email": "user4@example.com",
+      "customer_name": "Customer 4",
+      "subject": "App crashes on startup",
+      "description": "The application crashes immediately when I try to open it on Windows 10. It shows an exception error.",
+      "category": "feature_request",
+      "priority": "low",
+      "status": "resolved",
+      "tags": [
+        "tag3",
+        "tag4"
+      ],
+      "assigned_to": "",
+      "metadata": {
+        "source": "chat",
+        "browser": "Chrome",
+        "device_type": "desktop"
+      }
+    },
+    {
+      "customer_id": "CUST-1004",
+      "customer_email": "user5@example.com",
+      "customer_name": "Customer 5",
+      "subject": "Feature request: dark mode",
+      "description": "It would be really nice to have a dark mode option to reduce eye strain during night work.",
+      "category": "bug_report",
+      "priority": "urgent",
+      "status": "closed",
+      "tags": [
+        "tag4",
+        "tag0"
+      ],
+      "assigned_to": "agent2@support.com",
+      "metadata": {
+        "source": "phone",
+        "browser": "Chrome",
+        "device_type": "mobile"
+      }
+    },
+    {
+      "customer_id": "CUST-1005",
+      "customer_email": "user6@example.com",
+      "customer_name": "Customer 6",
+      "subject": "Bug in payment flow",
+      "description": "When checking out, the payment fails with a 500 server error. Steps to reproduce: add item to cart, click checkout, enter card details.",
+      "category": "other",
+      "priority": "high",
+      "status": "new",
+      "tags": [
+        "tag0",
+        "tag1"
+      ],
+      "assigned_to": "agent3@support.com",
+      "metadata": {
+        "source": "web_form",
+        "browser": "Chrome",
+        "device_type": "tablet"
+      }
+    },
+    {
+      "customer_id": "CUST-1006",
+      "customer_email": "user7@example.com",
+      "customer_name": "Customer 7",
+      "subject": "How do I upgrade my plan",
+      "description": "I want to upgrade from Basic to Pro plan but cannot find the option in my account settings.",
+      "category": "account_access",
+      "priority": "medium",
+      "status": "in_progress",
+      "tags": [
+        "tag1",
+        "tag2"
+      ],
+      "assigned_to": "",
+      "metadata": {
+        "source": "email",
+        "browser": "Chrome",
+        "device_type": "desktop"
+      }
+    },
+    {
+      "customer_id": "CUST-1007",
+      "customer_email": "user8@example.com",
+      "customer_name": "Customer 8",
+      "subject": "Critical production is down",
+      "description": "CRITICAL: Our production environment is completely down. All users are affected. Need immediate assistance.",
+      "category": "technical_issue",
+      "priority": "low",
+      "status": "waiting_customer",
+      "tags": [
+        "tag2",
+        "tag3"
+      ],
+      "assigned_to": "agent2@support.com",
+      "metadata": {
+        "source": "api",
+        "browser": "Chrome",
+        "device_type": "mobile"
+      }
+    },
+    {
+      "customer_id": "CUST-1008",
+      "customer_email": "user9@example.com",
+      "customer_name": "Customer 9",
+      "subject": "Security breach detected",
+      "description": "We detected suspicious login attempts from unknown IP addresses. Possible security breach detected.",
+      "category": "billing_question",
+      "priority": "urgent",
+      "status": "resolved",
+      "tags": [
+        "tag3",
+        "tag4"
+      ],
+      "assigned_to": "agent3@support.com",
+      "metadata": {
+        "source": "chat",
+        "browser": "Chrome",
+        "device_type": "tablet"
+      }
+    },
+    {
+      "customer_id": "CUST-1009",
+      "customer_email": "user10@example.com",
+      "customer_name": "Customer 10",
+      "subject": "Minor cosmetic issue in UI",
+      "description": "The button alignment on the settings page is slightly off. Minor cosmetic issue but would be nice to fix.",
+      "category": "feature_request",
+      "priority": "high",
+      "status": "closed",
+      "tags": [
+        "tag4",
+        "tag0"
+      ],
+      "assigned_to": "",
+      "metadata": {
+        "source": "phone",
+        "browser": "Chrome",
+        "device_type": "desktop"
+      }
+    },
+    {
+      "customer_id": "CUST-1010",
+      "customer_email": "user11@example.com",
+      "customer_name": "Customer 11",
+      "subject": "Suggestion for new dashboard",
+      "description": "Would suggest adding a customizable dashboard with drag and drop widgets for better productivity.",
+      "category": "bug_report",
+      "priority": "medium",
+      "status": "new",
+      "tags": [
+        "tag0",
+        "tag1"
+      ],
+      "assigned_to": "agent2@support.com",
+      "metadata": {
+        "source": "web_form",
+        "browser": "Chrome",
+        "device_type": "mobile"
+      }
+    },
+    {
+      "customer_id": "CUST-1011",
+      "customer_email": "user12@example.com",
+      "customer_name": "Customer 12",
+      "subject": "Error 500 on checkout",
+      "description": "Getting 500 error on the checkout page. This is happening consistently for all users in our team.",
+      "category": "other",
+      "priority": "low",
+      "status": "in_progress",
+      "tags": [
+        "tag1",
+        "tag2"
+      ],
+      "assigned_to": "agent3@support.com",
+      "metadata": {
+        "source": "email",
+        "browser": "Chrome",
+        "device_type": "tablet"
+      }
+    },
+    {
+      "customer_id": "CUST-1012",
+      "customer_email": "user13@example.com",
+      "customer_name": "Customer 13",
+      "subject": "Account locked after failed attempts",
+      "description": "After 5 failed login attempts my account got locked and the unlock email is not arriving in inbox.",
+      "category": "account_access",
+      "priority": "urgent",
+      "status": "waiting_customer",
+      "tags": [
+        "tag2",
+        "tag3"
+      ],
+      "assigned_to": "",
+      "metadata": {
+        "source": "api",
+        "browser": "Chrome",
+        "device_type": "desktop"
+      }
+    },
+    {
+      "customer_id": "CUST-1013",
+      "customer_email": "user14@example.com",
+      "customer_name": "Customer 14",
+      "subject": "Refund not processed",
+      "description": "I requested a refund 2 weeks ago but it has not been processed yet. Billing order ID is 12345.",
+      "category": "technical_issue",
+      "priority": "high",
+      "status": "resolved",
+      "tags": [
+        "tag3",
+        "tag4"
+      ],
+      "assigned_to": "agent2@support.com",
+      "metadata": {
+        "source": "chat",
+        "browser": "Chrome",
+        "device_type": "mobile"
+      }
+    },
+    {
+      "customer_id": "CUST-1014",
+      "customer_email": "user15@example.com",
+      "customer_name": "Customer 15",
+      "subject": "2FA not sending code",
+      "description": "The two-factor authentication code is not being sent to my phone number anymore after update.",
+      "category": "billing_question",
+      "priority": "medium",
+      "status": "closed",
+      "tags": [
+        "tag4",
+        "tag0"
+      ],
+      "assigned_to": "agent3@support.com",
+      "metadata": {
+        "source": "phone",
+        "browser": "Chrome",
+        "device_type": "tablet"
+      }
+    },
+    {
+      "customer_id": "CUST-1015",
+      "customer_email": "user16@example.com",
+      "customer_name": "Customer 16",
+      "subject": "Connection timeout on API",
+      "description": "The API is timing out after 30 seconds on all endpoints. Our integration is completely broken.",
+      "category": "feature_request",
+      "priority": "low",
+      "status": "new",
+      "tags": [
+        "tag0",
+        "tag1"
+      ],
+      "assigned_to": "",
+      "metadata": {
+        "source": "web_form",
+        "browser": "Chrome",
+        "device_type": "desktop"
+      }
+    },
+    {
+      "customer_id": "CUST-1016",
+      "customer_email": "user17@example.com",
+      "customer_name": "Customer 17",
+      "subject": "ASAP blocking our release",
+      "description": "This bug is blocking our entire release. ASAP fix needed for the authentication module today.",
+      "category": "bug_report",
+      "priority": "urgent",
+      "status": "in_progress",
+      "tags": [
+        "tag1",
+        "tag2"
+      ],
+      "assigned_to": "agent2@support.com",
+      "metadata": {
+        "source": "email",
+        "browser": "Chrome",
+        "device_type": "mobile"
+      }
+    },
+    {
+      "customer_id": "CUST-1017",
+      "customer_email": "user18@example.com",
+      "customer_name": "Customer 18",
+      "subject": "Wrong charge on credit card",
+      "description": "I was charged $50 instead of $25 this month. Please check my billing and refund the difference.",
+      "category": "other",
+      "priority": "high",
+      "status": "waiting_customer",
+      "tags": [
+        "tag2",
+        "tag3"
+      ],
+      "assigned_to": "agent3@support.com",
+      "metadata": {
+        "source": "api",
+        "browser": "Chrome",
+        "device_type": "tablet"
+      }
+    },
+    {
+      "customer_id": "CUST-1018",
+      "customer_email": "user19@example.com",
+      "customer_name": "Customer 19",
+      "subject": "Please add CSV export",
+      "description": "Please add the ability to export data as CSV format. This would greatly improve our daily workflow.",
+      "category": "account_access",
+      "priority": "medium",
+      "status": "resolved",
+      "tags": [
+        "tag3",
+        "tag4"
+      ],
+      "assigned_to": "",
+      "metadata": {
+        "source": "chat",
+        "browser": "Chrome",
+        "device_type": "desktop"
+      }
+    },
+    {
+      "customer_id": "CUST-1019",
+      "customer_email": "user20@example.com",
+      "customer_name": "Customer 20",
+      "subject": "Login fails with specific email",
+      "description": "Login fails when using an email with plus sign. Steps: use email user+tag@domain.com enter correct password click login.",
+      "category": "technical_issue",
+      "priority": "low",
+      "status": "closed",
+      "tags": [
+        "tag4",
+        "tag0"
+      ],
+      "assigned_to": "agent2@support.com",
+      "metadata": {
+        "source": "phone",
+        "browser": "Chrome",
+        "device_type": "mobile"
+      }
+    }
+  ]
+}
