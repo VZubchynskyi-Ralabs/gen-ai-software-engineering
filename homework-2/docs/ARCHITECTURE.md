@@ -1,5 +1,7 @@
 # Architecture
 
+This document describes the architectural decisions and structure of the ticket management system. The application is built as a lightweight Flask REST API backed by SQLite, intentionally avoiding heavy frameworks to keep the codebase transparent and easy to reason about. The layered design (routes → services → models → database) enforces a clear separation of concerns: route handlers deal only with HTTP concerns, service modules encapsulate business logic (parsing and classification), and `models.py` owns data validation and persistence. This makes it straightforward to swap any layer independently — for example, replacing SQLite with PostgreSQL or the keyword classifier with an ML model — without touching the rest of the system.
+
 ## High-Level Architecture
 
 ```mermaid
