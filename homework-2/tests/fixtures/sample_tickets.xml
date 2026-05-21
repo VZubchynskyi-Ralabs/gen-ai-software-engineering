@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tickets>
+  <ticket>
+    <customer_id>CUST-1000</customer_id>
+    <customer_email>user1@example.com</customer_email>
+    <customer_name>Customer 1</customer_name>
+    <subject>Cannot login to my account</subject>
+    <description>I cannot login to my account since yesterday. The error message says invalid credentials but I am sure my password is correct.</description>
+    <category>account_access</category>
+    <priority>urgent</priority>
+    <status>new</status>
+    <tags>
+      <tag>tag0</tag>
+      <tag>tag1</tag>
+    </tags>
+    <assigned_to></assigned_to>
+    <metadata>
+      <source>web_form</source>
+      <browser>Chrome</browser>
+      <device_type>desktop</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1001</customer_id>
+    <customer_email>user2@example.com</customer_email>
+    <customer_name>Customer 2</customer_name>
+    <subject>Password reset not working</subject>
+    <description>The password reset email never arrives even after multiple attempts. This is blocking me from accessing my account.</description>
+    <category>technical_issue</category>
+    <priority>high</priority>
+    <status>in_progress</status>
+    <tags>
+      <tag>tag1</tag>
+      <tag>tag2</tag>
+    </tags>
+    <assigned_to>agent2@support.com</assigned_to>
+    <metadata>
+      <source>email</source>
+      <browser>Chrome</browser>
+      <device_type>mobile</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1002</customer_id>
+    <customer_email>user3@example.com</customer_email>
+    <customer_name>Customer 3</customer_name>
+    <subject>Invoice amount is incorrect</subject>
+    <description>My latest invoice shows a charge of $200 but I should only be charged $150 according to my plan.</description>
+    <category>billing_question</category>
+    <priority>medium</priority>
+    <status>waiting_customer</status>
+    <tags>
+      <tag>tag2</tag>
+      <tag>tag3</tag>
+    </tags>
+    <assigned_to>agent3@support.com</assigned_to>
+    <metadata>
+      <source>api</source>
+      <browser>Chrome</browser>
+      <device_type>tablet</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1003</customer_id>
+    <customer_email>user4@example.com</customer_email>
+    <customer_name>Customer 4</customer_name>
+    <subject>App crashes on startup</subject>
+    <description>The application crashes immediately when I try to open it on Windows 10. It shows an exception error.</description>
+    <category>feature_request</category>
+    <priority>low</priority>
+    <status>resolved</status>
+    <tags>
+      <tag>tag3</tag>
+      <tag>tag4</tag>
+    </tags>
+    <assigned_to></assigned_to>
+    <metadata>
+      <source>chat</source>
+      <browser>Chrome</browser>
+      <device_type>desktop</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1004</customer_id>
+    <customer_email>user5@example.com</customer_email>
+    <customer_name>Customer 5</customer_name>
+    <subject>Feature request: dark mode</subject>
+    <description>It would be really nice to have a dark mode option to reduce eye strain during night work.</description>
+    <category>bug_report</category>
+    <priority>urgent</priority>
+    <status>closed</status>
+    <tags>
+      <tag>tag4</tag>
+      <tag>tag0</tag>
+    </tags>
+    <assigned_to>agent2@support.com</assigned_to>
+    <metadata>
+      <source>phone</source>
+      <browser>Chrome</browser>
+      <device_type>mobile</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1005</customer_id>
+    <customer_email>user6@example.com</customer_email>
+    <customer_name>Customer 6</customer_name>
+    <subject>Bug in payment flow</subject>
+    <description>When checking out, the payment fails with a 500 server error. Steps to reproduce: add item to cart, click checkout, enter card details.</description>
+    <category>other</category>
+    <priority>high</priority>
+    <status>new</status>
+    <tags>
+      <tag>tag0</tag>
+      <tag>tag1</tag>
+    </tags>
+    <assigned_to>agent3@support.com</assigned_to>
+    <metadata>
+      <source>web_form</source>
+      <browser>Chrome</browser>
+      <device_type>tablet</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1006</customer_id>
+    <customer_email>user7@example.com</customer_email>
+    <customer_name>Customer 7</customer_name>
+    <subject>How do I upgrade my plan</subject>
+    <description>I want to upgrade from Basic to Pro plan but cannot find the option in my account settings.</description>
+    <category>account_access</category>
+    <priority>medium</priority>
+    <status>in_progress</status>
+    <tags>
+      <tag>tag1</tag>
+      <tag>tag2</tag>
+    </tags>
+    <assigned_to></assigned_to>
+    <metadata>
+      <source>email</source>
+      <browser>Chrome</browser>
+      <device_type>desktop</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1007</customer_id>
+    <customer_email>user8@example.com</customer_email>
+    <customer_name>Customer 8</customer_name>
+    <subject>Critical production is down</subject>
+    <description>CRITICAL: Our production environment is completely down. All users are affected. Need immediate assistance.</description>
+    <category>technical_issue</category>
+    <priority>low</priority>
+    <status>waiting_customer</status>
+    <tags>
+      <tag>tag2</tag>
+      <tag>tag3</tag>
+    </tags>
+    <assigned_to>agent2@support.com</assigned_to>
+    <metadata>
+      <source>api</source>
+      <browser>Chrome</browser>
+      <device_type>mobile</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1008</customer_id>
+    <customer_email>user9@example.com</customer_email>
+    <customer_name>Customer 9</customer_name>
+    <subject>Security breach detected</subject>
+    <description>We detected suspicious login attempts from unknown IP addresses. Possible security breach detected.</description>
+    <category>billing_question</category>
+    <priority>urgent</priority>
+    <status>resolved</status>
+    <tags>
+      <tag>tag3</tag>
+      <tag>tag4</tag>
+    </tags>
+    <assigned_to>agent3@support.com</assigned_to>
+    <metadata>
+      <source>chat</source>
+      <browser>Chrome</browser>
+      <device_type>tablet</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1009</customer_id>
+    <customer_email>user10@example.com</customer_email>
+    <customer_name>Customer 10</customer_name>
+    <subject>Minor cosmetic issue in UI</subject>
+    <description>The button alignment on the settings page is slightly off. Minor cosmetic issue but would be nice to fix.</description>
+    <category>feature_request</category>
+    <priority>high</priority>
+    <status>closed</status>
+    <tags>
+      <tag>tag4</tag>
+      <tag>tag0</tag>
+    </tags>
+    <assigned_to></assigned_to>
+    <metadata>
+      <source>phone</source>
+      <browser>Chrome</browser>
+      <device_type>desktop</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1010</customer_id>
+    <customer_email>user11@example.com</customer_email>
+    <customer_name>Customer 11</customer_name>
+    <subject>Suggestion for new dashboard</subject>
+    <description>Would suggest adding a customizable dashboard with drag and drop widgets for better productivity.</description>
+    <category>bug_report</category>
+    <priority>medium</priority>
+    <status>new</status>
+    <tags>
+      <tag>tag0</tag>
+      <tag>tag1</tag>
+    </tags>
+    <assigned_to>agent2@support.com</assigned_to>
+    <metadata>
+      <source>web_form</source>
+      <browser>Chrome</browser>
+      <device_type>mobile</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1011</customer_id>
+    <customer_email>user12@example.com</customer_email>
+    <customer_name>Customer 12</customer_name>
+    <subject>Error 500 on checkout</subject>
+    <description>Getting 500 error on the checkout page. This is happening consistently for all users in our team.</description>
+    <category>other</category>
+    <priority>low</priority>
+    <status>in_progress</status>
+    <tags>
+      <tag>tag1</tag>
+      <tag>tag2</tag>
+    </tags>
+    <assigned_to>agent3@support.com</assigned_to>
+    <metadata>
+      <source>email</source>
+      <browser>Chrome</browser>
+      <device_type>tablet</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1012</customer_id>
+    <customer_email>user13@example.com</customer_email>
+    <customer_name>Customer 13</customer_name>
+    <subject>Account locked after failed attempts</subject>
+    <description>After 5 failed login attempts my account got locked and the unlock email is not arriving in inbox.</description>
+    <category>account_access</category>
+    <priority>urgent</priority>
+    <status>waiting_customer</status>
+    <tags>
+      <tag>tag2</tag>
+      <tag>tag3</tag>
+    </tags>
+    <assigned_to></assigned_to>
+    <metadata>
+      <source>api</source>
+      <browser>Chrome</browser>
+      <device_type>desktop</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1013</customer_id>
+    <customer_email>user14@example.com</customer_email>
+    <customer_name>Customer 14</customer_name>
+    <subject>Refund not processed</subject>
+    <description>I requested a refund 2 weeks ago but it has not been processed yet. Billing order ID is 12345.</description>
+    <category>technical_issue</category>
+    <priority>high</priority>
+    <status>resolved</status>
+    <tags>
+      <tag>tag3</tag>
+      <tag>tag4</tag>
+    </tags>
+    <assigned_to>agent2@support.com</assigned_to>
+    <metadata>
+      <source>chat</source>
+      <browser>Chrome</browser>
+      <device_type>mobile</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1014</customer_id>
+    <customer_email>user15@example.com</customer_email>
+    <customer_name>Customer 15</customer_name>
+    <subject>2FA not sending code</subject>
+    <description>The two-factor authentication code is not being sent to my phone number anymore after update.</description>
+    <category>billing_question</category>
+    <priority>medium</priority>
+    <status>closed</status>
+    <tags>
+      <tag>tag4</tag>
+      <tag>tag0</tag>
+    </tags>
+    <assigned_to>agent3@support.com</assigned_to>
+    <metadata>
+      <source>phone</source>
+      <browser>Chrome</browser>
+      <device_type>tablet</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1015</customer_id>
+    <customer_email>user16@example.com</customer_email>
+    <customer_name>Customer 16</customer_name>
+    <subject>Connection timeout on API</subject>
+    <description>The API is timing out after 30 seconds on all endpoints. Our integration is completely broken.</description>
+    <category>feature_request</category>
+    <priority>low</priority>
+    <status>new</status>
+    <tags>
+      <tag>tag0</tag>
+      <tag>tag1</tag>
+    </tags>
+    <assigned_to></assigned_to>
+    <metadata>
+      <source>web_form</source>
+      <browser>Chrome</browser>
+      <device_type>desktop</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1016</customer_id>
+    <customer_email>user17@example.com</customer_email>
+    <customer_name>Customer 17</customer_name>
+    <subject>ASAP blocking our release</subject>
+    <description>This bug is blocking our entire release. ASAP fix needed for the authentication module today.</description>
+    <category>bug_report</category>
+    <priority>urgent</priority>
+    <status>in_progress</status>
+    <tags>
+      <tag>tag1</tag>
+      <tag>tag2</tag>
+    </tags>
+    <assigned_to>agent2@support.com</assigned_to>
+    <metadata>
+      <source>email</source>
+      <browser>Chrome</browser>
+      <device_type>mobile</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1017</customer_id>
+    <customer_email>user18@example.com</customer_email>
+    <customer_name>Customer 18</customer_name>
+    <subject>Wrong charge on credit card</subject>
+    <description>I was charged $50 instead of $25 this month. Please check my billing and refund the difference.</description>
+    <category>other</category>
+    <priority>high</priority>
+    <status>waiting_customer</status>
+    <tags>
+      <tag>tag2</tag>
+      <tag>tag3</tag>
+    </tags>
+    <assigned_to>agent3@support.com</assigned_to>
+    <metadata>
+      <source>api</source>
+      <browser>Chrome</browser>
+      <device_type>tablet</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1018</customer_id>
+    <customer_email>user19@example.com</customer_email>
+    <customer_name>Customer 19</customer_name>
+    <subject>Please add CSV export</subject>
+    <description>Please add the ability to export data as CSV format. This would greatly improve our daily workflow.</description>
+    <category>account_access</category>
+    <priority>medium</priority>
+    <status>resolved</status>
+    <tags>
+      <tag>tag3</tag>
+      <tag>tag4</tag>
+    </tags>
+    <assigned_to></assigned_to>
+    <metadata>
+      <source>chat</source>
+      <browser>Chrome</browser>
+      <device_type>desktop</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1019</customer_id>
+    <customer_email>user20@example.com</customer_email>
+    <customer_name>Customer 20</customer_name>
+    <subject>Login fails with specific email</subject>
+    <description>Login fails when using an email with plus sign. Steps: use email user+tag@domain.com enter correct password click login.</description>
+    <category>technical_issue</category>
+    <priority>low</priority>
+    <status>closed</status>
+    <tags>
+      <tag>tag4</tag>
+      <tag>tag0</tag>
+    </tags>
+    <assigned_to>agent2@support.com</assigned_to>
+    <metadata>
+      <source>phone</source>
+      <browser>Chrome</browser>
+      <device_type>mobile</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1020</customer_id>
+    <customer_email>user21@example.com</customer_email>
+    <customer_name>Customer 21</customer_name>
+    <subject>Billing question about enterprise plan</subject>
+    <description>I have a billing question about the enterprise plan pricing and what features are included in it.</description>
+    <category>billing_question</category>
+    <priority>urgent</priority>
+    <status>new</status>
+    <tags>
+      <tag>tag0</tag>
+      <tag>tag1</tag>
+    </tags>
+    <assigned_to>agent3@support.com</assigned_to>
+    <metadata>
+      <source>web_form</source>
+      <browser>Chrome</browser>
+      <device_type>tablet</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1021</customer_id>
+    <customer_email>user22@example.com</customer_email>
+    <customer_name>Customer 22</customer_name>
+    <subject>Need help with account access</subject>
+    <description>Cannot access my admin panel after the recent system update. Getting access denied error on every page.</description>
+    <category>feature_request</category>
+    <priority>high</priority>
+    <status>in_progress</status>
+    <tags>
+      <tag>tag1</tag>
+      <tag>tag2</tag>
+    </tags>
+    <assigned_to></assigned_to>
+    <metadata>
+      <source>email</source>
+      <browser>Chrome</browser>
+      <device_type>desktop</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1022</customer_id>
+    <customer_email>user23@example.com</customer_email>
+    <customer_name>Customer 23</customer_name>
+    <subject>Technical issue with integrations</subject>
+    <description>There are technical issues with our third party integrations after the latest API update this week.</description>
+    <category>bug_report</category>
+    <priority>medium</priority>
+    <status>waiting_customer</status>
+    <tags>
+      <tag>tag2</tag>
+      <tag>tag3</tag>
+    </tags>
+    <assigned_to>agent2@support.com</assigned_to>
+    <metadata>
+      <source>api</source>
+      <browser>Chrome</browser>
+      <device_type>mobile</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1023</customer_id>
+    <customer_email>user24@example.com</customer_email>
+    <customer_name>Customer 24</customer_name>
+    <subject>Feature request: mobile app support</subject>
+    <description>A mobile app would be very useful for our team members who frequently work remotely from home.</description>
+    <category>other</category>
+    <priority>low</priority>
+    <status>resolved</status>
+    <tags>
+      <tag>tag3</tag>
+      <tag>tag4</tag>
+    </tags>
+    <assigned_to>agent3@support.com</assigned_to>
+    <metadata>
+      <source>chat</source>
+      <browser>Chrome</browser>
+      <device_type>tablet</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1024</customer_id>
+    <customer_email>user25@example.com</customer_email>
+    <customer_name>Customer 25</customer_name>
+    <subject>Bug report: data corruption on save</subject>
+    <description>Found a critical bug that causes data corruption when saving large records over 5MB. Actual behavior is data loss.</description>
+    <category>account_access</category>
+    <priority>urgent</priority>
+    <status>closed</status>
+    <tags>
+      <tag>tag4</tag>
+      <tag>tag0</tag>
+    </tags>
+    <assigned_to></assigned_to>
+    <metadata>
+      <source>phone</source>
+      <browser>Chrome</browser>
+      <device_type>desktop</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1025</customer_id>
+    <customer_email>user26@example.com</customer_email>
+    <customer_name>Customer 26</customer_name>
+    <subject>Cannot access admin panel</subject>
+    <description>I cannot access the admin panel anymore. It redirects me to the login page repeatedly in a loop.</description>
+    <category>technical_issue</category>
+    <priority>high</priority>
+    <status>new</status>
+    <tags>
+      <tag>tag0</tag>
+      <tag>tag1</tag>
+    </tags>
+    <assigned_to>agent2@support.com</assigned_to>
+    <metadata>
+      <source>web_form</source>
+      <browser>Chrome</browser>
+      <device_type>mobile</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1026</customer_id>
+    <customer_email>user27@example.com</customer_email>
+    <customer_name>Customer 27</customer_name>
+    <subject>Payment declined but money taken</subject>
+    <description>My payment was declined but the money was actually charged from my account. Need urgent assistance.</description>
+    <category>billing_question</category>
+    <priority>medium</priority>
+    <status>in_progress</status>
+    <tags>
+      <tag>tag1</tag>
+      <tag>tag2</tag>
+    </tags>
+    <assigned_to>agent3@support.com</assigned_to>
+    <metadata>
+      <source>email</source>
+      <browser>Chrome</browser>
+      <device_type>tablet</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1027</customer_id>
+    <customer_email>user28@example.com</customer_email>
+    <customer_name>Customer 28</customer_name>
+    <subject>Enhancement: add bulk operations</subject>
+    <description>It would be great to have bulk operations for managing multiple items at once instead of one by one.</description>
+    <category>feature_request</category>
+    <priority>low</priority>
+    <status>waiting_customer</status>
+    <tags>
+      <tag>tag2</tag>
+      <tag>tag3</tag>
+    </tags>
+    <assigned_to></assigned_to>
+    <metadata>
+      <source>api</source>
+      <browser>Chrome</browser>
+      <device_type>desktop</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1028</customer_id>
+    <customer_email>user29@example.com</customer_email>
+    <customer_name>Customer 29</customer_name>
+    <subject>Application is very slow to load</subject>
+    <description>The application has become very slow over the past week. Loading times now exceed 30 seconds per page.</description>
+    <category>bug_report</category>
+    <priority>urgent</priority>
+    <status>resolved</status>
+    <tags>
+      <tag>tag3</tag>
+      <tag>tag4</tag>
+    </tags>
+    <assigned_to>agent2@support.com</assigned_to>
+    <metadata>
+      <source>chat</source>
+      <browser>Chrome</browser>
+      <device_type>mobile</device_type>
+    </metadata>
+  </ticket>
+  <ticket>
+    <customer_id>CUST-1029</customer_id>
+    <customer_email>user30@example.com</customer_email>
+    <customer_name>Customer 30</customer_name>
+    <subject>Incorrect invoice amount charged</subject>
+    <description>The invoice amount is incorrect. Expected to be charged $100 but was actually charged $150 this cycle.</description>
+    <category>other</category>
+    <priority>high</priority>
+    <status>closed</status>
+    <tags>
+      <tag>tag4</tag>
+      <tag>tag0</tag>
+    </tags>
+    <assigned_to>agent3@support.com</assigned_to>
+    <metadata>
+      <source>phone</source>
+      <browser>Chrome</browser>
+      <device_type>tablet</device_type>
+    </metadata>
+  </ticket>
+</tickets>
