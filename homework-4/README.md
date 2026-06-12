@@ -1,6 +1,6 @@
 # Homework 4: 4-Agent Pipeline
 
-**Author:** Volodymyr  
+**Author:** Volodymyr Zubchynskyi
 **Course:** Gen AI Software Engineering  
 **Assignment:** Homework 4 - Multi-Agent Pipeline System  
 **Date:** June 12, 2026
