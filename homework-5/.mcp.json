@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "sh",
+      "args": [
+        "-c",
+        ". \"$HOME/projects/gen-ai-software-engineering/homework-5/.env\" && npx -y @modelcontextprotocol/server-github"
+      ]
+    },
+    "filesystem": {
+      "command": "sh",
+      "args": [
+        "-c",
+        "npx -y @modelcontextprotocol/server-filesystem $HOME/projects/gen-ai-software-engineering"
+      ]
+    },
+    "jira": {
+      "command": "sh",
+      "args": [
+        "-c",
+        ". \"$HOME/projects/gen-ai-software-engineering/homework-5/.env\" && uvx mcp-atlassian"
+      ]
+    },
+    "lorem-ipsum": {
+      "command": "sh",
+      "args": [
+        "-c",
+        "$HOME/projects/gen-ai-software-engineering/homework-5/custom-mcp-server/.venv/bin/python $HOME/projects/gen-ai-software-engineering/homework-5/custom-mcp-server/server.py"
+      ]
+    }
+  }
+}
