@@ -1,0 +1,25 @@
+# Local virtualenv
+.venv/
+
+# Generated pipeline run artifacts (keep the directory structure via .gitkeep)
+shared/input/*
+shared/processing/*
+shared/output/*
+shared/results/*
+!shared/input/.gitkeep
+!shared/processing/.gitkeep
+!shared/output/.gitkeep
+!shared/results/.gitkeep
+
+# Hook-generated audit log
+.claude/hooks/coverage-gate.log
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local Claude settings (personal permission overrides, not project config)
+.claude/settings.local.json
