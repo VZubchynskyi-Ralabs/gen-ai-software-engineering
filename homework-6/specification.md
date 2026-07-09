@@ -25,17 +25,31 @@ rules, and produces an auditable, per-transaction disposition (`approved`,
   currency-equivalent threshold), transactions initiated between 00:00–05:00
   UTC, and cross-border transactions each contribute to a numeric risk score
   (0.0–1.0); transactions scoring above **0.7** are flagged for fraud review.
-- **MO-3 — Compliance disposition:** Transactions that pass validation and
-  fraud scoring are checked for cross-border and transaction-type compliance
-  rules and receive a final status of `approved`, `flagged_for_review`, or
-  `rejected`.
-- **MO-4 — Auditable output:** Every transaction — accepted, rejected, or
+- **MO-3 — Configurable policy rule engine:** A declarative rule set
+  (`agents/rules_config.json`) is evaluated against every fraud-scored
+  transaction; a matching `reject` rule terminates the transaction
+  (`policy_rejected`), and matching `flag` rules are attached as
+  `data.policy_flags` for the compliance checker — new rules are added by
+  editing JSON, never by changing agent code.
+- **MO-4 — Compliance disposition:** Transactions that pass validation,
+  fraud scoring, and the rule engine are checked for cross-border and
+  transaction-type compliance rules (plus any `policy_flags` already
+  attached) and receive a final status of `approved`, `flagged_for_review`,
+  or `rejected`.
+- **MO-5 — Auditable output:** Every transaction — accepted, rejected, or
   flagged — is written as a JSON result file to `shared/results/` with a
   reason field, its full agent history, and no plaintext PII.
-- **MO-5 — Traceable logging:** Every agent operation (validate, score,
-  check) is logged as one structured line with an ISO 8601 timestamp, agent
-  name, transaction ID, and outcome, so a full run can be reconstructed from
-  logs alone.
+- **MO-6 — Traceable logging:** Every agent operation (validate, score,
+  screen, check) is logged as one structured line with an ISO 8601
+  timestamp, agent name, transaction ID, and outcome, so a full run can be
+  reconstructed from logs alone.
+- **MO-7 — HTTP access to the pipeline:** A REST API gateway
+  (`api/server.py`) exposes `POST /transactions`, `GET /transactions`,
+  `GET /transactions/{id}`, `GET /summary`, `GET /health`, and
+  `GET`/`PUT /rules`, so transactions can be submitted, results retrieved,
+  and the policy rule engine reconfigured over HTTP without invoking the
+  CLI or hand-editing `agents/rules_config.json`, reusing the same
+  `shared/` tree and `integrator.py`/`rule_engine.py` functions.
 
 ---
 
@@ -142,15 +156,50 @@ advisory at this stage, final disposition happens in compliance).
 
 ---
 
+### Task: Policy Rule Engine
+
+**Prompt:** "Write a Python module `agents/rule_engine.py` exposing
+`process_message(message: dict) -> dict` that evaluates a fraud-scored
+transaction against a declarative rule set loaded from
+`agents/rules_config.json` (a JSON list of `{field, operator, value,
+action, reason}` entries, with an optional `min_amount`). A matching
+`reject` rule makes the message terminal; matching `flag` rules are
+collected as `data.policy_flags`. Business rules must live in the JSON
+config, not in this module's code."
+
+**File to CREATE:** `agents/rule_engine.py`, `agents/rules_config.json`
+
+**Function to CREATE:** `process_message(message: dict) -> dict`,
+`load_rules(rules_path=None) -> list[dict]`, `evaluate_rules(data, rules)
+-> tuple[dict | None, list[dict]]`
+
+**Details:** Loads rules from `agents/rules_config.json` by default (an
+override path is accepted, primarily for tests); supports dot-path field
+lookup (e.g. `metadata.country`) and operators `eq`, `neq`, `in`, `not_in`,
+plus an optional `min_amount` comparison parsed via `parse_amount` (never
+`float`); a missing or malformed rules file degrades to "no rules" rather
+than crashing the pipeline. The first matching `action: "reject"` rule sets
+`data.status = "policy_rejected"` and `data.policy_reason`, with no
+`target_agent` (terminal, mirrors `transaction_validator`'s rejection
+pattern). Otherwise every matching `action: "flag"` rule's `reason` is
+collected into `data.policy_flags` (no PII); the fraud detector's own
+`data.status` is left untouched. Always forwards to `compliance_checker`
+unless rejected. Bundled rules: reject transactions where
+`metadata.country` is in a sanctioned-country list (`KP, IR, SY, CU`); flag
+`withdrawal` transactions over $5,000 and `wire_transfer` transactions over
+$50,000 for manual review.
+
+---
+
 ### Task: Compliance Checker
 
 **Prompt:** "Write a Python module `agents/compliance_checker.py` exposing
 `process_message(message: dict) -> dict` that makes the final disposition
 for a transaction: rejects unknown transaction types, flags cross-border
 transactions and any transaction already `flagged_for_review` by fraud
-detection for manual review, and approves everything else. Write a
-`data.final_status` of `approved`, `flagged_for_review`, or `rejected` with
-a `data.reason`."
+detection or carrying `policy_flags` from the rule engine for manual
+review, and approves everything else. Write a `data.final_status` of
+`approved`, `flagged_for_review`, or `rejected` with a `data.reason`."
 
 **File to CREATE:** `agents/compliance_checker.py`
 
@@ -159,11 +208,13 @@ a `data.reason`."
 **Details:** Validates `transaction_type` against
 `KNOWN_TRANSACTION_TYPES`; if unknown, `final_status = "rejected"`,
 `reason = "unknown_transaction_type"`; else if inbound
-`data.status == "flagged_for_review"` (from fraud detector) or the
-transaction is cross-border, `final_status = "flagged_for_review"`; else
-`final_status = "approved"`. This is the terminal agent — its output is
-written directly to `shared/results/{transaction_id}.json`, not forwarded
-further.
+`data.status == "flagged_for_review"` (from fraud detector), the
+transaction is cross-border, or `data.policy_flags` is non-empty (from the
+rule engine), `final_status = "flagged_for_review"` with all triggered
+reasons (`fraud_risk_flagged`, `cross_border`, `policy_rule_flagged`)
+joined in `data.reason`; else `final_status = "approved"`. This is the
+terminal agent — its output is written directly to
+`shared/results/{transaction_id}.json`, not forwarded further.
 
 ---
 
@@ -172,25 +223,79 @@ further.
 **Prompt:** "Write `integrator.py` that sets up the `shared/` directory
 tree, loads `sample-transactions.json`, wraps each record as a
 `message_type: "transaction"` message, and runs it through
-`transaction_validator -> fraud_detector -> compliance_checker` in-process
-(moving each message through `processing/`/`output/` for auditability),
-then writes a `pipeline_summary.json` report and prints a human-readable
-summary to stdout."
+`transaction_validator -> fraud_detector -> rule_engine ->
+compliance_checker` in-process (moving each message through
+`processing/`/`output/` for auditability), then writes a
+`pipeline_summary.json` report and prints a human-readable summary to
+stdout. Also expose `load_result`, `list_results`, and `rebuild_summary`
+helpers so other components (the REST API gateway) can read/aggregate
+results without duplicating this logic."
 
 **File to CREATE:** `integrator.py`
 
-**Function to CREATE:** `run_pipeline(input_path: Path, shared_root: Path) -> dict`
+**Function to CREATE:** `run_pipeline(input_path: Path, shared_root: Path) -> dict`,
+`load_result(shared_root: Path, transaction_id: str) -> dict | None`,
+`list_results(shared_root: Path) -> list[dict]`,
+`rebuild_summary(shared_root: Path) -> dict`
 
 **Details:** Creates `shared/{input,processing,output,results}` if missing;
 reads the input JSON array; for each record, builds the standard message
 envelope, calls each agent's `process_message` in sequence (stopping early
 on a terminal/rejected result), archives intermediate messages under
 `processing/` and `output/` for traceability, and writes the final message
-to `results/{transaction_id}.json`; aggregates counts by `final_status`
-(or `status` for early-rejected messages) into `pipeline_summary.json`;
-appends every agent log line to `pipeline_run.log`; supports a
-`--clear` flag to wipe `shared/` before running (used by the
+to `results/{transaction_id}.json`; `rebuild_summary` scans every
+`results/TXN*.json` file and (re)writes `pipeline_summary.json` with counts
+by `final_status` (or `status` for early-rejected/policy-rejected
+messages) — `run_pipeline` calls it once after processing the whole batch,
+and the REST API gateway calls it once per ad-hoc submission so both paths
+stay consistent; appends every agent log line to `pipeline_run.log`;
+supports a `--clear` flag to wipe `shared/` before running (used by the
 `/run-pipeline` skill).
+
+---
+
+### Task: REST API Gateway
+
+**Prompt:** "Write a FastAPI app `api/server.py` exposing `POST
+/transactions` (run one raw transaction through the full pipeline and
+return its terminal result), `GET /transactions` (list all results), `GET
+/transactions/{transaction_id}` (fetch one, 404 if absent), `GET /summary`
+(the current `pipeline_summary.json`, 404 if no run yet), `GET /health`,
+and `GET`/`PUT /rules` (read/replace the policy rule engine's
+configuration over HTTP instead of hand-editing
+`agents/rules_config.json`). Reuse `integrator.py`'s
+`process_transaction`, `load_result`, `list_results`, and
+`rebuild_summary`, and `agents/rule_engine.py`'s `DEFAULT_RULES_PATH` —
+no business logic in this file."
+
+**File to CREATE:** `api/server.py`
+
+**Function to CREATE:** `submit_transaction`, `list_transactions`,
+`get_transaction`, `get_summary`, `health`, `get_rules`, `update_rules`
+(FastAPI route handlers)
+
+**Details:** Resolves the shared/ root from the `PIPELINE_SHARED_ROOT` env
+var (default `"shared"`) on every request, so tests and `demo.sh` can
+target an isolated directory without code changes; `POST /transactions`
+validates the request body against the same required fields as
+`transaction_validator` via a Pydantic model, calls
+`integrator.process_transaction` for that single record, calls
+`integrator.rebuild_summary`, and returns the resulting terminal message
+(HTTP 201); missing/unknown transaction IDs return HTTP 404, not a raised
+exception. `GET /rules` reads whatever `agents/rule_engine.py` would
+itself load (`rule_engine.DEFAULT_RULES_PATH` — a live attribute lookup,
+not a copied path, so a monkeypatched override in tests affects both this
+endpoint and actual pipeline runs identically) and returns `{"rules": []}`
+if the file doesn't exist yet, matching `load_rules`'s fail-open
+behavior; `PUT /rules` validates the full replacement body against a
+Pydantic model mirroring `agents/rule_engine.py`'s rule shape (`id`,
+`field`, `operator` restricted to `eq`/`neq`/`in`/`not_in`, `value`,
+optional `min_amount` validated as a parseable decimal string, `action`
+restricted to `reject`/`flag`, `reason`) — a structurally invalid rule is
+rejected with HTTP 422 before it ever reaches disk — then overwrites
+`agents/rules_config.json` in place; the next `POST /transactions` picks
+up the change immediately, since the rule engine reloads its config file
+on every call rather than caching it in memory.
 
 ---
 
@@ -219,13 +324,16 @@ consumption.
 ### Task: Test Suite
 
 **Prompt:** "Write pytest unit tests for each agent module (accept, reject,
-and flag paths) and one integration test that runs `run_pipeline` against a
-temporary copy of `sample-transactions.json` and a `tmp_path`-based
-`shared/`, asserting every transaction produces exactly one result file."
+and flag paths), one for the REST API gateway (submit/list/get/summary,
+using FastAPI's TestClient against a tmp_path-based shared root), and one
+integration test that runs `run_pipeline` against a temporary copy of
+`sample-transactions.json` and a `tmp_path`-based `shared/`, asserting
+every transaction produces exactly one result file."
 
 **File to CREATE:** `tests/test_transaction_validator.py`,
-`tests/test_fraud_detector.py`, `tests/test_compliance_checker.py`,
-`tests/test_integrator.py`
+`tests/test_fraud_detector.py`, `tests/test_rule_engine.py`,
+`tests/test_compliance_checker.py`, `tests/test_integrator.py`,
+`tests/test_api_gateway.py`
 
 **Function to CREATE:** one `test_*` function per behavior branch listed
 in each agent's Details section above.
@@ -242,9 +350,11 @@ all file I/O in integration tests goes through `tmp_path`. Coverage target
 |---|---|
 | MO-1 Structural validation | `tests/test_transaction_validator.py`; manual check on `TXN006` (bad currency) and `TXN007` (negative amount) |
 | MO-2 Fraud risk scoring | `tests/test_fraud_detector.py`; manual check on `TXN002`, `TXN005` (high value), `TXN004` (off-hours + cross-border) |
-| MO-3 Compliance disposition | `tests/test_compliance_checker.py` |
-| MO-4 Auditable output | `tests/test_integrator.py` asserts one file per transaction in `shared/results/` |
-| MO-5 Traceable logging | Manual review of `shared/results/pipeline_run.log` after a run |
+| MO-3 Configurable policy rule engine | `tests/test_rule_engine.py`; manual check via `agents/rule_engine.py --dry-run` |
+| MO-4 Compliance disposition | `tests/test_compliance_checker.py` |
+| MO-5 Auditable output | `tests/test_integrator.py` asserts one file per transaction in `shared/results/` |
+| MO-6 Traceable logging | Manual review of `shared/results/pipeline_run.log` after a run |
+| MO-7 HTTP access to the pipeline | `tests/test_api_gateway.py`; manual check with `./demo.sh` or the `curl` commands in `HOWTORUN.md` |
 
 ---
 

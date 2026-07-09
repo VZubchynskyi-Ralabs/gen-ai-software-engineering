@@ -21,12 +21,13 @@ from collections import Counter
 from pathlib import Path
 from typing import Optional
 
-from agents import compliance_checker, fraud_detector, transaction_validator
-from agents.common import ensure_shared_dirs, new_message, write_json
+from agents import compliance_checker, fraud_detector, rule_engine, transaction_validator
+from agents.common import ensure_shared_dirs, new_message, read_json, write_json
 
 PIPELINE = (
     ("transaction_validator", transaction_validator),
     ("fraud_detector", fraud_detector),
+    ("rule_engine", rule_engine),
     ("compliance_checker", compliance_checker),
 )
 
@@ -62,6 +63,52 @@ def process_transaction(raw: dict, paths: dict, log_path: Path) -> dict:
     return message
 
 
+def _outcome_from_result(data: dict) -> dict:
+    return {
+        "transaction_id": data.get("transaction_id"),
+        "status": _outcome_status(data),
+        "reason": data.get("reason") or data.get("rejection_reason") or data.get("policy_reason"),
+        "risk_score": data.get("risk_score"),
+    }
+
+
+def list_results(shared_root: Path) -> list[dict]:
+    """Return one outcome dict per terminal result file in shared/results/."""
+    results_dir = shared_root / "results"
+    if not results_dir.exists():
+        return []
+    outcomes = []
+    for path in sorted(results_dir.glob("TXN*.json")):
+        message = read_json(path)
+        outcomes.append(_outcome_from_result(message.get("data", {})))
+    return outcomes
+
+
+def load_result(shared_root: Path, transaction_id: str) -> Optional[dict]:
+    """Return the raw terminal message for one transaction, or None if absent."""
+    path = shared_root / "results" / f"{transaction_id}.json"
+    if not path.exists():
+        return None
+    return read_json(path)
+
+
+def rebuild_summary(shared_root: Path) -> dict:
+    """Recompute pipeline_summary.json from every result file on disk.
+
+    Used after both a full batch run and a single ad-hoc API submission, so
+    the summary always reflects the current contents of shared/results/.
+    """
+    outcomes = list_results(shared_root)
+    status_counts = Counter(o["status"] for o in outcomes)
+    summary = {
+        "total_transactions": len(outcomes),
+        "status_counts": dict(status_counts),
+        "outcomes": outcomes,
+    }
+    write_json(shared_root / "results" / "pipeline_summary.json", summary)
+    return summary
+
+
 def run_pipeline(input_path: Path, shared_root: Path, clear: bool = False) -> dict:
     if clear:
         clear_shared(shared_root)
@@ -70,27 +117,10 @@ def run_pipeline(input_path: Path, shared_root: Path, clear: bool = False) -> di
 
     transactions = json.loads(input_path.read_text(encoding="utf-8"))
 
-    outcomes = []
     for raw in transactions:
-        final_message = process_transaction(raw, paths, log_path)
-        data = final_message["data"]
-        outcomes.append(
-            {
-                "transaction_id": data.get("transaction_id"),
-                "status": _outcome_status(data),
-                "reason": data.get("reason") or data.get("rejection_reason"),
-                "risk_score": data.get("risk_score"),
-            }
-        )
+        process_transaction(raw, paths, log_path)
 
-    status_counts = Counter(o["status"] for o in outcomes)
-    summary = {
-        "total_transactions": len(outcomes),
-        "status_counts": dict(status_counts),
-        "outcomes": outcomes,
-    }
-    write_json(paths["results"] / "pipeline_summary.json", summary)
-    return summary
+    return rebuild_summary(shared_root)
 
 
 def print_summary(summary: dict) -> None:

@@ -46,6 +46,12 @@ def test_cross_border_transaction_is_flagged_for_review():
     assert "cross_border" in outbound["data"]["reason"]
 
 
+def test_policy_flagged_transaction_is_flagged_for_review():
+    outbound = process_message(_message({"policy_flags": ["large_wire_requires_review"]}))
+    assert outbound["data"]["final_status"] == "flagged_for_review"
+    assert "policy_rule_flagged" in outbound["data"]["reason"]
+
+
 def test_fraud_and_cross_border_both_recorded_in_reason():
     outbound = process_message(
         _message({"status": "flagged_for_review", "metadata": {"channel": "api", "country": "DE"}})
