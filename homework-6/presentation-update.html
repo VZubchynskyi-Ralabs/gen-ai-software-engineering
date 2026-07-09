@@ -1,0 +1,737 @@
+<title>Pipeline Update: Rule Engine, REST API, One-Command Demo</title>
+<style>
+  :root {
+    --ink: #12161c;
+    --panel: #1b212a;
+    --panel-2: #222a35;
+    --rule: #303945;
+    --paper: #ece8dd;
+    --muted: #8b93a0;
+    --accent: #c9a227;
+    --accent-dim: #8a7220;
+    --teal: #4f9088;
+    --good: #5fa872;
+    --warn: #d8a13b;
+    --bad: #c1594f;
+    --font-display: Georgia, "Times New Roman", Times, serif;
+    --font-body: Arial, Helvetica, sans-serif;
+    --font-mono: "Courier New", Courier, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #05070a;
+    color: var(--paper);
+    font-family: var(--font-body);
+    height: 100%;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: clamp(12px, 3vw, 32px);
+    gap: 16px;
+  }
+
+  .deck {
+    width: min(1180px, 100%);
+    aspect-ratio: 16 / 9.2;
+    background: var(--ink);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 30px 80px -30px rgba(0,0,0,0.7);
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    padding: clamp(28px, 4.5vw, 64px);
+    display: none;
+    flex-direction: column;
+    animation: rise 420ms ease both;
+  }
+  .slide.active { display: flex; }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .slide { animation: none; }
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px 0;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(28px, 4vw, 46px);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 0 0 10px 0;
+    text-wrap: balance;
+    color: var(--paper);
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(21px, 2.6vw, 28px);
+    margin: 0 0 4px 0;
+    text-wrap: balance;
+    color: var(--paper);
+  }
+
+  .lede {
+    font-size: clamp(14px, 1.5vw, 18px);
+    line-height: 1.55;
+    color: var(--muted);
+    max-width: 66ch;
+    margin: 0;
+  }
+
+  /* ---------- Title-style slides (credits + main title) ---------- */
+  .centered-slide { justify-content: center; }
+  .credit-cols {
+    display: flex;
+    gap: 40px;
+    margin-top: 26px;
+    flex-wrap: wrap;
+  }
+  .credit-card {
+    flex: 1 1 220px;
+    border-left: 2px solid var(--accent-dim);
+    padding-left: 18px;
+  }
+  .credit-card .who {
+    font-family: var(--font-display);
+    font-size: 20px;
+    color: var(--paper);
+    margin: 0 0 6px 0;
+  }
+  .credit-card .role {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    line-height: 1.6;
+    margin: 0;
+  }
+  .title-wrap { max-width: 80%; }
+  .title-rule {
+    width: 64px;
+    height: 2px;
+    background: var(--accent);
+    margin: 22px 0 22px 0;
+  }
+  .byline {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    gap: 22px;
+    flex-wrap: wrap;
+  }
+  .byline b { color: var(--paper); font-weight: 600; }
+  .chain-mark {
+    position: absolute;
+    right: clamp(28px, 4.5vw, 64px);
+    bottom: clamp(28px, 4.5vw, 64px);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .chain-mark .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--rule); }
+  .chain-mark .dot.on { background: var(--accent); }
+  .chain-mark .arrow { color: var(--rule); }
+
+  /* ---------- Shared: card grids ---------- */
+  .flow {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 22px;
+  }
+  .flow.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .agent-card {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 16px 18px;
+    position: relative;
+  }
+  .agent-card.is-new { border-color: var(--accent-dim); background: linear-gradient(180deg, rgba(201,162,39,0.08), var(--panel)); }
+  .agent-card .idx {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+  }
+  .agent-card h3 {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    margin: 8px 0 8px 0;
+    color: var(--paper);
+    font-weight: 600;
+  }
+  .agent-card p {
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--muted);
+    margin: 0;
+  }
+  .agent-card code { color: var(--teal); }
+  .agent-card .term {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--teal);
+    border: 1px solid var(--teal);
+    border-radius: 3px;
+    padding: 2px 6px;
+  }
+  .agent-card .new-tag {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent-dim);
+    border-radius: 3px;
+    padding: 2px 6px;
+  }
+  .flow-arrows {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 6px;
+  }
+  .flow-arrows.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .flow-arrows span {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--rule);
+    text-align: center;
+  }
+  .flow-arrows span:not(:first-child)::before { content: "->  "; color: var(--teal); }
+
+  .storage-row {
+    margin-top: auto;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    gap: 26px;
+    flex-wrap: wrap;
+  }
+  .storage-item {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+  .storage-item b { color: var(--paper); }
+
+  /* ---------- Shared: column grid (asks / api+demo) ---------- */
+  .auto-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 22px;
+    flex: 1;
+  }
+  .auto-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .auto-col {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .auto-col .label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .auto-col .label .file {
+    color: var(--teal);
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 10.5px;
+  }
+  .auto-col ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .auto-col li {
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--paper);
+    padding-left: 14px;
+    border-left: 2px solid var(--rule);
+  }
+  .auto-col li code {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--teal);
+  }
+  .auto-col li span.d {
+    display: block;
+    color: var(--muted);
+    font-size: 11.5px;
+    margin-top: 2px;
+  }
+  .auto-col .ask-quote {
+    font-family: var(--font-display);
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--paper);
+    margin: 0;
+    font-style: italic;
+  }
+
+  /* ---------- endpoint list ---------- */
+  .endpoint-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+  .endpoint {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .verb {
+    flex: 0 0 auto;
+    width: 44px;
+    text-align: center;
+    border-radius: 3px;
+    padding: 1px 0;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+  }
+  .verb.get { color: var(--teal); border: 1px solid var(--teal); }
+  .verb.post { color: var(--accent); border: 1px solid var(--accent-dim); }
+  .endpoint .path { color: var(--paper); }
+  .endpoint .desc { color: var(--muted); font-family: var(--font-body); font-size: 12px; }
+
+  .step-list { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; counter-reset: step; }
+  .step-list li {
+    list-style: none;
+    counter-increment: step;
+    padding-left: 26px;
+    position: relative;
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--paper);
+  }
+  .step-list li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: var(--panel-2);
+    border: 1px solid var(--rule);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .step-list li span.d { display: block; color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+
+  /* ---------- Results ---------- */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 20px 0 18px 0;
+  }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 12px 14px;
+  }
+  .stat .n {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 26px;
+    color: var(--paper);
+    font-weight: 600;
+  }
+  .stat .l {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .stat.good .n { color: var(--good); }
+  .stat .delta { font-family: var(--font-mono); font-size: 11px; color: var(--accent); margin-top: 4px; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; }
+  table { border-collapse: collapse; width: 100%; font-size: 12px; }
+  thead th {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 9px 12px;
+    background: var(--panel-2);
+    border-bottom: 1px solid var(--rule);
+  }
+  tbody td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--paper);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.hl td { background: rgba(201,162,39,0.06); }
+  .pill {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 0.02em;
+  }
+  .pill.approved { background: rgba(95,168,114,0.14); color: var(--good); border: 1px solid rgba(95,168,114,0.4); }
+  .pill.flagged { background: rgba(216,161,59,0.14); color: var(--warn); border: 1px solid rgba(216,161,59,0.4); }
+  .pill.rejected { background: rgba(193,89,79,0.14); color: var(--bad); border: 1px solid rgba(193,89,79,0.4); }
+
+  .stack-strip {
+    margin-top: 14px;
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--muted);
+  }
+  .stack-strip b { color: var(--paper); }
+
+  /* ---------- Nav ---------- */
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .nav button {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    color: var(--paper);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .nav button:hover { border-color: var(--accent); color: var(--accent); }
+  .nav button:focus-visible, .dot-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .dots { display: flex; gap: 8px; }
+  .dot-btn {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--rule); border: none; cursor: pointer; padding: 0;
+  }
+  .dot-btn.active { background: var(--accent); }
+
+  /* ---------- Print / PDF export ---------- */
+  @page { size: 13.333in 7.5in; margin: 0; }
+  @media print {
+    html, body { background: var(--ink); }
+    body { display: block; min-height: 0; padding: 0; gap: 0; }
+    .deck {
+      width: 100%; aspect-ratio: auto; border: none; border-radius: 0;
+      box-shadow: none; overflow: visible;
+    }
+    .slide {
+      position: relative; inset: auto; height: 7.5in;
+      display: flex !important; animation: none !important;
+      page-break-after: always; break-after: page;
+    }
+    .slide:last-child { page-break-after: auto; break-after: auto; }
+    .nav { display: none; }
+  }
+</style>
+
+<div class="deck" id="deck">
+
+  <section class="slide active centered-slide" id="slide-0">
+    <div class="title-wrap">
+      <p class="eyebrow">Homework 6 Capstone - Pipeline Update</p>
+      <h1>Made by False Team, with Claude AI</h1>
+      <div class="title-rule"></div>
+      <p class="lede">
+        A human team setting direction and reviewing every change, paired
+        with Claude AI doing the planning, implementation, tests, and
+        documentation shown in this deck - the rule engine, the REST API
+        gateway, and the demo script that proves both work.
+      </p>
+    </div>
+    <div class="credit-cols">
+      <div class="credit-card">
+        <p class="who">False Team</p>
+        <p class="role">DIRECTION &amp; REVIEW<br>REQUIREMENTS - ACCEPTANCE</p>
+      </div>
+      <div class="credit-card">
+        <p class="who">Claude AI</p>
+        <p class="role">IMPLEMENTATION<br>CODE - TESTS - DOCS - THIS DECK</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide centered-slide" id="slide-1">
+    <div class="title-wrap">
+      <p class="eyebrow">Homework 6 Capstone - Pipeline Update</p>
+      <h1>A Fourth Agent, an HTTP Front Door, and One Command to See It All Work</h1>
+      <div class="title-rule"></div>
+      <p class="lede">
+        Three change requests, three shipped pieces: a configurable policy
+        rule engine slotted into the agent chain, a REST API gateway that
+        puts the file-based pipeline behind ordinary HTTP calls, and
+        <code style="color:var(--teal); font-family:var(--font-mono); font-size:15px;">demo.sh</code>
+        - a script that starts the system, submits every sample transaction,
+        and prints the results with nothing left for a human to click.
+      </p>
+    </div>
+    <div class="byline">
+      <span><b>Created by</b> Volodymyr Zubchynskyi</span>
+      <span>./demo.sh -> shared/results/</span>
+    </div>
+    <div class="chain-mark">
+      <span>validator</span><span class="dot on"></span>
+      <span class="arrow">-></span>
+      <span>fraud</span><span class="dot on"></span>
+      <span class="arrow">-></span>
+      <span>rule engine</span><span class="dot on"></span>
+      <span class="arrow">-></span>
+      <span>compliance</span><span class="dot on"></span>
+    </div>
+  </section>
+
+  <section class="slide" id="slide-2">
+    <p class="eyebrow">The Brief</p>
+    <h2>Three requests, read verbatim</h2>
+    <p class="lede">The update request specified exactly three additions to the existing three-agent pipeline. Each is mapped below to what actually shipped.</p>
+
+    <div class="auto-grid">
+      <div class="auto-col">
+        <span class="label">Request 1<span class="file">agents/rule_engine.py</span></span>
+        <p class="ask-quote">"A new agent + configurable rule engine"</p>
+        <ul>
+          <li>Rules live in <code>rules_config.json</code>, not in Python<span class="d">field / operator / value / action - edit JSON, not code</span></li>
+          <li>Sits between fraud scoring and compliance<span class="d">reject terminates; flag adds to compliance's evidence</span></li>
+        </ul>
+      </div>
+      <div class="auto-col">
+        <span class="label">Request 2<span class="file">api/server.py</span></span>
+        <p class="ask-quote">"A REST API gateway... so transactions can be submitted and results retrieved via API calls"</p>
+        <ul>
+          <li>FastAPI over the existing pipeline<span class="d">no business logic duplicated - calls integrator.py directly</span></li>
+          <li>7 routes: submit, list, get, summary, health, plus rules<span class="d">GET/PUT /rules reconfigures the policy engine live, no file edit</span></li>
+        </ul>
+      </div>
+      <div class="auto-col">
+        <span class="label">Request 3<span class="file">demo.sh</span></span>
+        <p class="ask-quote">"A demo script... starts everything, submits test transactions, and displays results with zero manual steps"</p>
+        <ul>
+          <li>One command, full round trip<span class="d">venv -> server -> 8 submissions -> summary -> teardown</span></li>
+          <li>No jq, no extra dependency<span class="d">stdlib urllib for HTTP, python -m json.tool to render</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="slide-3">
+    <p class="eyebrow">Architecture - Now Four Agents</p>
+    <h2>The rule engine slots in, not on top</h2>
+    <p class="lede">Same file-based protocol, one more hop. A configurable policy check now sits between risk scoring and final disposition.</p>
+
+    <div class="flow cols-4">
+      <div class="agent-card">
+        <span class="idx">AGENT 1</span>
+        <h3>transaction_validator</h3>
+        <p>Required fields, positive <code>Decimal</code> amount, valid ISO&nbsp;4217 currency. Unchanged.</p>
+      </div>
+      <div class="agent-card">
+        <span class="idx">AGENT 2</span>
+        <h3>fraud_detector</h3>
+        <p>0-1 risk score from value, timing, cross-border, and instrument signals. Unchanged.</p>
+      </div>
+      <div class="agent-card is-new">
+        <span class="idx">AGENT 3</span>
+        <h3>rule_engine</h3>
+        <p>Evaluates <code>rules_config.json</code>: sanctioned-country -> reject; large withdrawal or branch wire -> flag.</p>
+        <span class="new-tag">new</span>
+      </div>
+      <div class="agent-card">
+        <span class="idx">AGENT 4</span>
+        <h3>compliance_checker</h3>
+        <p>Final call - now also reads <code>policy_flags</code> alongside fraud risk and cross-border checks.</p>
+        <span class="term">terminal</span>
+      </div>
+    </div>
+    <div class="flow-arrows cols-4">
+      <span>shared/input/</span><span>processing/</span><span>output/</span><span>shared/results/</span>
+    </div>
+
+    <div class="storage-row">
+      <span class="storage-item"><b>integrator.py</b> - PIPELINE tuple now carries 4 stages, in order</span>
+      <span class="storage-item"><b>rules_config.json</b> - the only file a new policy requires editing</span>
+      <span class="storage-item"><b>policy_flags</b> - carried in the message envelope, no schema break</span>
+    </div>
+  </section>
+
+  <section class="slide" id="slide-4">
+    <p class="eyebrow">HTTP Front Door</p>
+    <h2>api/server.py, driven end to end by demo.sh</h2>
+    <p class="lede">The gateway is a thin adapter - every route calls straight into <code style="color:var(--teal); font-family:var(--font-mono);">integrator.py</code> or <code style="color:var(--teal); font-family:var(--font-mono);">rule_engine.py</code>. <code style="color:var(--teal); font-family:var(--font-mono);">demo.sh</code> is the client that proves it.</p>
+
+    <div class="auto-grid cols-2">
+      <div class="auto-col">
+        <span class="label">Routes</span>
+        <div class="endpoint-list">
+          <div class="endpoint"><span class="verb post">POST</span><span class="path">/transactions</span><span class="desc">run one transaction through all four agents</span></div>
+          <div class="endpoint"><span class="verb get">GET</span><span class="path">/transactions</span><span class="desc">list every stored result</span></div>
+          <div class="endpoint"><span class="verb get">GET</span><span class="path">/transactions/{id}</span><span class="desc">fetch one - 404 if unknown</span></div>
+          <div class="endpoint"><span class="verb get">GET</span><span class="path">/summary</span><span class="desc">counts by final status, run-level</span></div>
+          <div class="endpoint"><span class="verb get">GET</span><span class="path">/health</span><span class="desc">readiness probe for demo.sh</span></div>
+          <div class="endpoint"><span class="verb get">GET</span><span class="path">/rules</span><span class="desc">read the policy engine's current config</span></div>
+          <div class="endpoint"><span class="verb post">PUT</span><span class="path">/rules</span><span class="desc">replace it - validated, live on the next submission</span></div>
+        </div>
+      </div>
+      <div class="auto-col">
+        <span class="label">./demo.sh, in order</span>
+        <ol class="step-list">
+          <li>Reset <code style="color:var(--teal); font-family:var(--font-mono); font-size:11.5px;">shared/</code> for a clean run<span class="d">same effect as integrator.py --clear</span></li>
+          <li>Start uvicorn, wait on <code style="color:var(--teal); font-family:var(--font-mono); font-size:11.5px;">/health</code><span class="d">polling loop, not a fixed sleep</span></li>
+          <li>POST all 8 sample transactions<span class="d">prints id + final status as each returns</span></li>
+          <li>GET /summary, pretty-print, tear down<span class="d">trap kills the server on exit, even on error</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="slide-5">
+    <p class="eyebrow">Verification</p>
+    <h2>86 tests, 98.8% coverage, same split - plus a live config channel</h2>
+
+    <div class="stat-row">
+      <div class="stat good"><div class="n">98.8%</div><div class="l">coverage (gate: 80%)</div><div class="delta">api/server.py: 100%</div></div>
+      <div class="stat"><div class="n">86</div><div class="l">unit + integration tests</div><div class="delta">+35 vs. pre-update</div></div>
+      <div class="stat"><div class="n">3 / 3 / 2</div><div class="l">approved / flagged / rejected</div><div class="delta">unchanged by the new agent</div></div>
+      <div class="stat"><div class="n">422</div><div class="l">rejects a malformed rule</div><div class="delta">bad operator, action, or min_amount</div></div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Transaction</th><th>Amount</th><th>Status</th><th>Reason</th></tr></thead>
+        <tbody>
+          <tr><td>TXN001</td><td>1,500.00 USD</td><td><span class="pill approved">approved</span></td><td>no_issues_found</td></tr>
+          <tr><td>TXN002</td><td>25,000.00 USD</td><td><span class="pill flagged">flagged</span></td><td>fraud_risk_flagged</td></tr>
+          <tr><td>TXN003</td><td>9,999.99 USD</td><td><span class="pill approved">approved</span></td><td>no_issues_found</td></tr>
+          <tr><td>TXN004</td><td>500.00 EUR</td><td><span class="pill flagged">flagged</span></td><td>cross_border (DE)</td></tr>
+          <tr class="hl"><td>TXN005</td><td>75,000.00 USD</td><td><span class="pill flagged">flagged</span></td><td>fraud_risk_flagged, <b>policy_rule_flagged</b> (new)</td></tr>
+          <tr><td>TXN006</td><td>200.00 XYZ</td><td><span class="pill rejected">rejected</span></td><td>invalid_currency</td></tr>
+          <tr><td>TXN007</td><td>-100.00 GBP</td><td><span class="pill rejected">rejected</span></td><td>invalid_amount</td></tr>
+          <tr><td>TXN008</td><td>3,200.00 USD</td><td><span class="pill approved">approved</span></td><td>no_issues_found</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="stack-strip">
+      <span><b>New deps</b> fastapi, uvicorn[standard], httpx</span>
+      <span><b>New files</b> agents/rule_engine.py, agents/rules_config.json, api/server.py, demo.sh</span>
+      <span><b>Reused</b> integrator.py's process_transaction, load_result, list_results, rebuild_summary</span>
+      <span><b>Latest</b> GET/PUT /rules - config changes take effect with zero downtime</span>
+    </div>
+  </section>
+
+</div>
+
+<div class="nav">
+  <button id="prev" aria-label="Previous slide">&lt;</button>
+  <div class="dots" id="dots"></div>
+  <button id="next" aria-label="Next slide">&gt;</button>
+  <span id="slide-label">1 / 6</span>
+</div>
+
+<script>
+  (function () {
+    var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+    var dotsWrap = document.getElementById('dots');
+    var label = document.getElementById('slide-label');
+    var current = 0;
+
+    slides.forEach(function (_, i) {
+      var b = document.createElement('button');
+      b.className = 'dot-btn' + (i === 0 ? ' active' : '');
+      b.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+      b.addEventListener('click', function () { go(i); });
+      dotsWrap.appendChild(b);
+    });
+
+    function go(i) {
+      current = (i + slides.length) % slides.length;
+      slides.forEach(function (s, idx) { s.classList.toggle('active', idx === current); });
+      Array.prototype.forEach.call(dotsWrap.children, function (d, idx) {
+        d.classList.toggle('active', idx === current);
+      });
+      label.textContent = (current + 1) + ' / ' + slides.length;
+    }
+
+    document.getElementById('prev').addEventListener('click', function () { go(current - 1); });
+    document.getElementById('next').addEventListener('click', function () { go(current + 1); });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === ' ') { go(current + 1); }
+      if (e.key === 'ArrowLeft') { go(current - 1); }
+    });
+  })();
+</script>

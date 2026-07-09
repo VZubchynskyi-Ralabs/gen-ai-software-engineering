@@ -116,7 +116,13 @@ this repo) and ask Claude: *"What's the status of TXN002?"*
 .venv/bin/python -m uvicorn api.server:app --reload
 ```
 
-Then, in another terminal:
+Then open `http://127.0.0.1:8000/` in a browser for a small console
+(`api/static/index.html`, served by `api/server.py` itself — no separate
+process) with a transaction form, quick-fill demo scenarios, a live
+ledger of results, a run summary, and an editor for the policy rule book
+(`GET`/`PUT /rules`). It's the same API described below with a UI on top.
+
+Or, in another terminal, drive the API directly:
 
 ```bash
 # Submit a transaction (runs it through the full 4-agent pipeline)

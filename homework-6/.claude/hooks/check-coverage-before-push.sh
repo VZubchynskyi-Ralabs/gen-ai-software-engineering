@@ -34,7 +34,7 @@ fi
 LOG_FILE="$PROJECT_DIR/.claude/hooks/coverage-gate.log"
 TIMESTAMP="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
-COV_OUTPUT="$("$PY" -m pytest --cov=agents --cov=integrator --cov=mcp --cov-report=term-missing -q 2>&1)" || true
+COV_OUTPUT="$("$PY" -m pytest --cov=agents --cov=integrator --cov=mcp --cov=api --cov-report=term-missing -q 2>&1)" || true
 echo "$COV_OUTPUT" >&2
 
 COVERAGE_PCT=$(printf '%s' "$COV_OUTPUT" | grep -E '^TOTAL' | awk '{print $NF}' | tr -d '%')

@@ -166,3 +166,10 @@ This starts `api/server.py` via `uvicorn`, submits every record in
 transaction's final status, and prints the run summary from `GET
 /summary` — no manual steps. See `HOWTORUN.md` for the individual `curl`
 commands if you want to drive the API by hand.
+
+While the server is up (during `./demo.sh`, or via
+`KEEP_RUNNING=1 ./demo.sh`, or a plain `uvicorn api.server:app`), open
+`http://127.0.0.1:8000/` in a browser for a small console
+(`api/static/index.html`) that submits transactions, edits the policy
+rule book, and watches the ledger and run summary update live — the same
+endpoints as the CLI, with a UI on top.
