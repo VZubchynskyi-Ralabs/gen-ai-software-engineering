@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multi-Agent Banking Pipeline - Live Demo</title>
+<style>
+  :root {
+    --ink: #10141a;
+    --ink-2: #0a0d11;
+    --panel: #1a212a;
+    --panel-2: #212a35;
+    --rule: #303c4a;
+    --rule-soft: #263140;
+    --paper: #ece7d8;
+    --muted: #8b96a3;
+    --accent: #c9a227;
+    --accent-soft: #e2c25a;
+    --accent-dim: #7d6a24;
+    --teal: #4f9088;
+    --good: #6cb583;
+    --warn: #d8a13b;
+    --bad: #c6635a;
+    --font-display: Georgia, "Times New Roman", Times, serif;
+    --font-body: Arial, Helvetica, sans-serif;
+    --font-mono: "Courier New", Courier, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--font-body);
+  }
+
+  body {
+    background-image:
+      radial-gradient(circle at 12% -10%, rgba(201,162,39,0.10), transparent 42%),
+      linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%);
+    padding: clamp(18px, 3vw, 40px);
+    min-height: 100vh;
+  }
+
+  .wrap { max-width: 1200px; margin: 0 auto; }
+
+  /* ---------- Letterhead ---------- */
+  .letterhead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--rule);
+    flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 16px; }
+  .seal {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    box-shadow: inset 0 0 0 3px var(--ink), inset 0 0 0 4px var(--accent-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 20px;
+    color: var(--accent-soft);
+    flex: 0 0 auto;
+  }
+  .brand h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(20px, 2.6vw, 27px);
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+  .brand .tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    margin-top: 3px;
+  }
+  .conn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    padding: 7px 12px;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: var(--panel);
+  }
+  .conn .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--bad);
+    box-shadow: 0 0 0 3px rgba(198,99,90,0.18);
+    transition: background 200ms, box-shadow 200ms;
+  }
+  .conn .dot.up { background: var(--good); box-shadow: 0 0 0 3px rgba(108,181,131,0.18); }
+
+  /* ---------- Layout ---------- */
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  .col { display: flex; flex-direction: column; gap: 20px; }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 20px 22px;
+  }
+  .panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .panel-head h2 {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-soft);
+    margin: 0;
+  }
+  .ghost-btn {
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    padding: 5px 11px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .ghost-btn:hover { border-color: var(--accent-dim); color: var(--accent-soft); }
+  .ghost-btn:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  /* ---------- Scenario chips ---------- */
+  .scenarios { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .chip {
+    background: var(--panel-2);
+    border: 1px solid var(--rule);
+    color: var(--paper);
+    font-family: var(--font-body);
+    font-size: 11.5px;
+    padding: 7px 13px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: border-color 150ms, color 150ms;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--accent-soft); }
+  .chip .k { color: var(--muted); }
+
+  /* ---------- Form ---------- */
+  form.txn { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+  form.txn .full { grid-column: 1 / -1; }
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  input, select {
+    background: var(--panel-2);
+    border: 1px solid var(--rule);
+    color: var(--paper);
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    padding: 9px 10px;
+    border-radius: 6px;
+  }
+  input::placeholder { color: #566072; }
+
+  .stamp-btn {
+    grid-column: 1 / -1;
+    margin-top: 4px;
+    background: var(--accent);
+    border: none;
+    color: var(--ink-2);
+    font-family: var(--font-display);
+    font-weight: bold;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    padding: 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: transform 80ms ease, background 150ms;
+  }
+  .stamp-btn:hover { background: var(--accent-soft); }
+  .stamp-btn:active { transform: scale(0.98); }
+  .stamp-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+  .result-box {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px dashed var(--rule);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.5;
+    display: none;
+    animation: stamp-in 220ms ease both;
+  }
+  .result-box.show { display: block; }
+  @keyframes stamp-in { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
+  @media (prefers-reduced-motion: reduce) { .result-box { animation: none; } }
+  .result-box.ok { border-color: rgba(108,181,131,0.5); background: rgba(108,181,131,0.06); }
+  .result-box.bad { border-color: rgba(198,99,90,0.5); background: rgba(198,99,90,0.06); }
+
+  /* ---------- Stamped status pills ---------- */
+  .pill {
+    display: inline-block;
+    font-family: var(--font-body);
+    font-weight: bold;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 3px;
+    transform: rotate(-1.5deg);
+  }
+  .pill.approved { background: rgba(108,181,131,0.12); color: var(--good); border: 1px solid rgba(108,181,131,0.55); }
+  .pill.flagged_for_review { background: rgba(216,161,59,0.12); color: var(--warn); border: 1px solid rgba(216,161,59,0.55); }
+  .pill.rejected, .pill.policy_rejected { background: rgba(198,99,90,0.12); color: var(--bad); border: 1px solid rgba(198,99,90,0.55); }
+  .pill.unknown { background: var(--panel-2); color: var(--muted); border: 1px solid var(--rule); }
+
+  /* ---------- Stat strip ---------- */
+  .stat-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .stat {
+    background: var(--panel-2);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 10px 16px;
+    min-width: 86px;
+  }
+  .stat .n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 22px; font-weight: bold; color: var(--paper); }
+  .stat .l { font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+
+  /* ---------- Ledger table ---------- */
+  .ledger-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 8px; margin-top: 16px; }
+  table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+  thead th {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 9px 14px;
+    background: var(--panel-2);
+    border-bottom: 1px solid var(--rule);
+  }
+  tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--rule-soft);
+    font-family: var(--font-mono);
+    color: var(--paper);
+  }
+  tbody tr:nth-child(even) { background: rgba(255,255,255,0.015); }
+  tbody tr:last-child td { border-bottom: none; }
+  .empty-row td { color: var(--muted); font-style: italic; }
+
+  /* ---------- Rule book (ledger paper) ---------- */
+  textarea.rules {
+    width: 100%;
+    min-height: 240px;
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        transparent 0, transparent 22px,
+        var(--rule-soft) 23px, transparent 24px
+      ),
+      var(--panel-2);
+    border: 1px solid var(--rule);
+    color: var(--paper);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 24px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    resize: vertical;
+  }
+  .rules-actions { display: flex; gap: 10px; margin-top: 12px; }
+  .rules-actions .primary {
+    background: var(--teal);
+    border: none;
+    color: var(--ink-2);
+    font-family: var(--font-body);
+    font-weight: bold;
+    font-size: 12.5px;
+    padding: 9px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .rules-actions .primary:hover { filter: brightness(1.08); }
+  .rules-status { font-family: var(--font-mono); font-size: 11.5px; margin-top: 10px; min-height: 14px; color: var(--muted); }
+  .rules-status.ok { color: var(--good); }
+  .rules-status.err { color: var(--bad); }
+
+  footer {
+    margin-top: 26px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    letter-spacing: 0.02em;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="letterhead">
+    <div class="brand">
+      <div class="seal">$</div>
+      <div>
+        <h1>Multi-Agent Banking Pipeline</h1>
+        <div class="tag">LIVE DEMO CONSOLE - api/server.py</div>
+      </div>
+    </div>
+    <div class="conn" id="conn">
+      <span class="dot" id="conn-dot"></span>
+      <span id="conn-text">connecting...</span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="col">
+
+      <div class="panel">
+        <div class="panel-head"><h2>New Transaction</h2></div>
+        <div class="scenarios">
+          <button type="button" class="chip" data-scenario="approved"><span class="k">1</span> Normal transfer</button>
+          <button type="button" class="chip" data-scenario="large_wire"><span class="k">2</span> Large wire (fraud flag)</button>
+          <button type="button" class="chip" data-scenario="sanctioned"><span class="k">3</span> Sanctioned country (policy reject)</button>
+          <button type="button" class="chip" data-scenario="bad_currency"><span class="k">4</span> Bad currency (validator reject)</button>
+        </div>
+        <form class="txn" id="txn-form">
+          <label class="full">Transaction ID
+            <input name="transaction_id" required>
+          </label>
+          <label>Amount
+            <input name="amount" required>
+          </label>
+          <label>Currency
+            <select name="currency">
+              <option>USD</option><option>EUR</option><option>GBP</option>
+              <option>JPY</option><option>CAD</option><option>AUD</option><option>CHF</option>
+            </select>
+          </label>
+          <label>Transaction type
+            <select name="transaction_type">
+              <option>transfer</option><option>wire_transfer</option><option>refund</option>
+              <option>payment</option><option>deposit</option><option>withdrawal</option>
+            </select>
+          </label>
+          <label>Country (metadata)
+            <input name="country" value="US">
+          </label>
+          <label>Source account
+            <input name="source_account" value="ACC-1001">
+          </label>
+          <label>Destination account
+            <input name="destination_account" value="ACC-2001">
+          </label>
+          <label>Channel (metadata)
+            <input name="channel" value="online">
+          </label>
+          <button type="submit" class="stamp-btn">Submit Transaction</button>
+        </form>
+        <div class="result-box" id="result-box"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Policy Rule Book - agents/rules_config.json</h2>
+          <button type="button" class="ghost-btn" id="rules-reload">Reload</button>
+        </div>
+        <textarea class="rules" id="rules-text" spellcheck="false"></textarea>
+        <div class="rules-actions">
+          <button type="button" class="primary" id="rules-save">Save (PUT /rules)</button>
+        </div>
+        <div class="rules-status" id="rules-status"></div>
+      </div>
+
+    </div>
+
+    <div class="col">
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Run Summary</h2>
+          <button type="button" class="ghost-btn" id="refresh-summary">Refresh</button>
+        </div>
+        <div class="stat-row" id="summary-stats">
+          <div class="stat"><div class="n">-</div><div class="l">no run yet</div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Transaction Ledger - GET /transactions</h2>
+          <button type="button" class="ghost-btn" id="refresh-list">Refresh</button>
+        </div>
+        <div class="ledger-wrap">
+          <table>
+            <thead><tr><th>Transaction</th><th>Status</th><th>Reason</th></tr></thead>
+            <tbody id="results-body">
+              <tr class="empty-row"><td colspan="3">No transactions submitted yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>POST /transactions | GET /transactions[/{id}] | GET /summary | GET/PUT /rules | GET /health</footer>
+</div>
+
+<script>
+(function () {
+  var form = document.getElementById('txn-form');
+  var resultBox = document.getElementById('result-box');
+  var resultsBody = document.getElementById('results-body');
+  var summaryStats = document.getElementById('summary-stats');
+  var rulesText = document.getElementById('rules-text');
+  var rulesStatus = document.getElementById('rules-status');
+  var connDot = document.getElementById('conn-dot');
+  var connText = document.getElementById('conn-text');
+
+  function statusOf(data) {
+    return data.final_status || data.status || 'unknown';
+  }
+
+  function pillClass(status) {
+    var known = ['approved', 'flagged_for_review', 'rejected', 'policy_rejected'];
+    return 'pill ' + (known.indexOf(status) > -1 ? status : 'unknown');
+  }
+
+  function nextTxnId() {
+    return 'TXN' + Date.now().toString().slice(-8);
+  }
+
+  var SCENARIOS = {
+    approved: { amount: '1500.00', currency: 'USD', transaction_type: 'transfer', country: 'US' },
+    large_wire: { amount: '75000.00', currency: 'USD', transaction_type: 'wire_transfer', country: 'US' },
+    sanctioned: { amount: '2000.00', currency: 'USD', transaction_type: 'transfer', country: 'KP' },
+    bad_currency: { amount: '200.00', currency: 'XYZ', transaction_type: 'transfer', country: 'US' }
+  };
+
+  document.querySelectorAll('.chip').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var s = SCENARIOS[btn.dataset.scenario];
+      form.transaction_id.value = nextTxnId();
+      form.amount.value = s.amount;
+      form.currency.value = s.currency;
+      form.transaction_type.value = s.transaction_type;
+      form.country.value = s.country;
+    });
+  });
+
+  form.transaction_id.value = nextTxnId();
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+
+    var payload = {
+      transaction_id: form.transaction_id.value,
+      timestamp: new Date().toISOString().replace(/\.\d+Z$/, 'Z'),
+      source_account: form.source_account.value,
+      destination_account: form.destination_account.value,
+      amount: form.amount.value,
+      currency: form.currency.value,
+      transaction_type: form.transaction_type.value,
+      metadata: { channel: form.channel.value, country: form.country.value }
+    };
+
+    fetch('/transactions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .then(function (res) { return res.json().then(function (body) { return { ok: res.ok, body: body }; }); })
+      .then(function (r) {
+        resultBox.classList.add('show');
+        if (r.ok) {
+          var data = r.body.data;
+          var reason = data.reason || data.rejection_reason || data.policy_reason;
+          var status = statusOf(data);
+          resultBox.className = 'result-box show ' + (status === 'approved' ? 'ok' : (status === 'flagged_for_review' ? '' : 'bad'));
+          resultBox.innerHTML = data.transaction_id + ': <span class="' + pillClass(status) + '">' + status + '</span>' +
+            (reason ? ' - ' + reason : '');
+          form.transaction_id.value = nextTxnId();
+          refreshList();
+          refreshSummary();
+        } else {
+          resultBox.className = 'result-box show bad';
+          resultBox.textContent = 'Rejected by the API: ' + JSON.stringify(r.body.detail);
+        }
+      })
+      .catch(function (err) {
+        resultBox.className = 'result-box show bad';
+        resultBox.textContent = 'Request failed: ' + err;
+      })
+      .finally(function () { submitBtn.disabled = false; });
+  });
+
+  function refreshList() {
+    fetch('/transactions')
+      .then(function (res) { return res.json(); })
+      .then(function (body) {
+        if (!body.transactions.length) {
+          resultsBody.innerHTML = '<tr class="empty-row"><td colspan="3">No transactions submitted yet.</td></tr>';
+          return;
+        }
+        resultsBody.innerHTML = body.transactions.map(function (t) {
+          return '<tr><td>' + t.transaction_id + '</td>' +
+            '<td><span class="' + pillClass(t.status) + '">' + t.status + '</span></td>' +
+            '<td>' + (t.reason || '') + '</td></tr>';
+        }).join('');
+      })
+      .catch(function () {});
+  }
+
+  function refreshSummary() {
+    fetch('/summary')
+      .then(function (res) {
+        if (res.status === 404) { return null; }
+        return res.json();
+      })
+      .then(function (body) {
+        if (!body) {
+          summaryStats.innerHTML = '<div class="stat"><div class="n">-</div><div class="l">no run yet</div></div>';
+          return;
+        }
+        var counts = body.status_counts || {};
+        var html = '<div class="stat"><div class="n">' + body.total_transactions + '</div><div class="l">total</div></div>';
+        Object.keys(counts).forEach(function (k) {
+          html += '<div class="stat"><div class="n">' + counts[k] + '</div><div class="l">' + k + '</div></div>';
+        });
+        summaryStats.innerHTML = html;
+      })
+      .catch(function () {});
+  }
+
+  function loadRules() {
+    rulesStatus.textContent = '';
+    rulesStatus.className = 'rules-status';
+    fetch('/rules')
+      .then(function (res) { return res.json(); })
+      .then(function (body) {
+        rulesText.value = JSON.stringify(body, null, 2);
+      })
+      .catch(function (err) {
+        rulesStatus.textContent = 'Failed to load rules: ' + err;
+        rulesStatus.className = 'rules-status err';
+      });
+  }
+
+  document.getElementById('rules-save').addEventListener('click', function () {
+    var parsed;
+    try {
+      parsed = JSON.parse(rulesText.value);
+    } catch (err) {
+      rulesStatus.textContent = 'Invalid JSON: ' + err.message;
+      rulesStatus.className = 'rules-status err';
+      return;
+    }
+    fetch('/rules', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(parsed)
+    })
+      .then(function (res) { return res.json().then(function (body) { return { ok: res.ok, body: body }; }); })
+      .then(function (r) {
+        if (r.ok) {
+          rulesText.value = JSON.stringify(r.body, null, 2);
+          rulesStatus.textContent = 'Saved - takes effect on the next submission.';
+          rulesStatus.className = 'rules-status ok';
+        } else {
+          rulesStatus.textContent = 'Rejected: ' + JSON.stringify(r.body.detail);
+          rulesStatus.className = 'rules-status err';
+        }
+      })
+      .catch(function (err) {
+        rulesStatus.textContent = 'Request failed: ' + err;
+        rulesStatus.className = 'rules-status err';
+      });
+  });
+
+  document.getElementById('rules-reload').addEventListener('click', loadRules);
+  document.getElementById('refresh-list').addEventListener('click', refreshList);
+  document.getElementById('refresh-summary').addEventListener('click', refreshSummary);
+
+  function checkHealth() {
+    fetch('/health')
+      .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+      .then(function () {
+        connDot.classList.add('up');
+        connText.textContent = 'online';
+      })
+      .catch(function () {
+        connDot.classList.remove('up');
+        connText.textContent = 'offline';
+      });
+  }
+
+  checkHealth();
+  setInterval(checkHealth, 8000);
+  refreshList();
+  refreshSummary();
+  loadRules();
+})();
+</script>
+</body>
+</html>

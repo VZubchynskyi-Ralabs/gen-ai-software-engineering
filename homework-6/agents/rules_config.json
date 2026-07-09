@@ -1,0 +1,39 @@
+{
+  "rules": [
+    {
+      "action": "reject",
+      "description": "Reject transactions touching a sanctioned country.",
+      "field": "metadata.country",
+      "id": "sanctioned_country",
+      "operator": "in",
+      "reason": "sanctioned_country",
+      "value": [
+        "KP",
+        "IR",
+        "SY",
+        "CU",
+        "RU"
+      ]
+    },
+    {
+      "action": "flag",
+      "description": "Flag large cash withdrawals for manual review.",
+      "field": "transaction_type",
+      "id": "large_withdrawal",
+      "min_amount": "5000.00",
+      "operator": "eq",
+      "reason": "large_cash_withdrawal",
+      "value": "withdrawal"
+    },
+    {
+      "action": "flag",
+      "description": "Flag very large branch wire transfers for manual review.",
+      "field": "transaction_type",
+      "id": "restricted_branch_wire",
+      "min_amount": "50000.00",
+      "operator": "eq",
+      "reason": "large_wire_requires_review",
+      "value": "wire_transfer"
+    }
+  ]
+}

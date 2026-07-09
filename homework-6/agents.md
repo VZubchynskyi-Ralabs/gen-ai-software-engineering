@@ -27,13 +27,30 @@ monetary handling, and logging, regardless of which tool generated the code.
   `shared/{input,processing,output,results}/`, per the protocol in
   `specification.md`.
 - **Pipeline order:** `transaction_validator` → `fraud_detector` →
-  `compliance_checker`. The integrator (`integrator.py`) is the only
-  component that knows this order; each agent only knows how to consume one
-  message shape and produce the next.
+  `rule_engine` → `compliance_checker`. The integrator (`integrator.py`) is
+  the only component that knows this order; each agent only knows how to
+  consume one message shape and produce the next.
 - **Third agent choice:** Compliance Checker (cross-border / sanctioned
   country / restricted transaction-type rules), chosen over Settlement
   Processor and Reporting Agent because it composes naturally with the fraud
   detector's risk score to decide final disposition.
+- **Fourth agent — configurable rule engine:** `agents/rule_engine.py` loads
+  a declarative rule set from `agents/rules_config.json` (field/operator/
+  value/action) instead of hard-coding business rules in Python, so new
+  policy rules (sanctioned countries, large-withdrawal limits, etc.) can be
+  added by editing JSON, not code. A matching `reject` rule is terminal
+  (same pattern as `transaction_validator`); matching `flag` rules are
+  attached as `data.policy_flags` and read by the compliance checker
+  alongside the fraud score.
+- **REST API gateway:** `api/server.py` (FastAPI + uvicorn) wraps the
+  file-based pipeline behind HTTP endpoints (`POST /transactions`,
+  `GET /transactions`, `GET /transactions/{id}`, `GET /summary`,
+  `GET /health`, `GET`/`PUT /rules`) so transactions can be submitted,
+  results retrieved, and the rule engine reconfigured over HTTP instead of
+  via the CLI or hand-editing `agents/rules_config.json`. It's a thin
+  adapter — it reuses `integrator.py`'s `process_transaction`/
+  `rebuild_summary` and `rule_engine.py`'s `DEFAULT_RULES_PATH`, and writes
+  to the same `shared/` tree the CLI and MCP server use.
 - **MCP servers:** `context7` (library/framework lookup during code
   generation — see `research-notes.md`) and a custom FastMCP server
   (`mcp/server.py`, exposed as `pipeline-status`) that makes pipeline results
@@ -50,6 +67,8 @@ monetary handling, and logging, regardless of which tool generated the code.
 | Testing | `pytest`, `pytest-cov` |
 | MCP | `fastmcp` (custom server), `@upstash/context7-mcp` (research) |
 | CLI orchestration | Plain `argparse`-based scripts, no external framework |
+| REST API gateway | `fastapi` + `uvicorn` (`api/server.py`), thin HTTP adapter over `integrator.py` |
+| Rule config | Declarative JSON (`agents/rules_config.json`), no DSL/database |
 
 ---
 
@@ -151,13 +170,19 @@ else in a log line.
 ## Agent Behavior Guidelines
 
 ### When Generating Code
-1. Prefer the standard library over new dependencies; this project has no
-   database, web framework, or network calls in the core pipeline.
+1. Prefer the standard library over new dependencies for the core pipeline
+   agents; they have no database or network calls. The one exception is
+   `api/server.py`, a thin FastAPI/uvicorn HTTP adapter — it must not
+   contain business logic, only request/response translation to
+   `integrator.py`'s existing functions.
 2. Keep each agent a pure function of `(inbound message) -> outbound message`
    plus file I/O at the edges — this is what makes them independently unit
    testable.
 3. Every new agent must be registered in `integrator.py`'s pipeline order and
    documented in `specification.md`'s Low-Level Tasks.
+4. Business rules that are likely to change (thresholds, allow/deny lists)
+   belong in `agents/rules_config.json`, evaluated by the generic engine in
+   `agents/rule_engine.py` — not hard-coded as new `if`/`elif` branches.
 
 ### When Answering Questions
 - Reference `specification.md` for the authoritative behavior of each agent.
